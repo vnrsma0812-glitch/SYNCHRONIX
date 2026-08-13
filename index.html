@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNCHRONIX — Smart Traffic Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="backendBanner" class="backend-banner hidden">
+    <div class="banner-content">
+        <span class="warning-icon">⚠️</span>
+        <div class="banner-text">
+            <strong>C BACKEND NOT CONNECTED</strong>
+            <small>The simulator is running in preview mode. Start the C server for full backend logic.</small>
+        </div>
+        <div class="banner-actions">
+            <button class="retry-btn" onclick="checkBackendStatus()">Retry</button>
+            <button class="retry-btn" onclick="document.getElementById('backendBanner').classList.add('hidden')">Dismiss</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-shell">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">🚦</div>
+            <div>
+                <div class="eyebrow">SMART CITY / TRAFFIC AI</div>
+                <h1>SYNCHRONIX</h1>
+            </div>
+        </div>
+
+        <div class="topbar-center">
+            <div class="system-state"><span class="status-dot online" id="statusDot"></span><span id="statusText">C BACKEND ONLINE</span></div>
+            <div class="system-state accent"><span>●</span> <span id="modeBadgeText">SYNCHRONIX AI</span></div>
+        </div>
+
+        <div class="top-actions">
+            <div class="clock-card">
+                <span class="clock-label">SYSTEM</span>
+                <strong id="liveClock">LIVE</strong>
+            </div>
+            <button class="exhibition-toggle-btn" onclick="toggleExhibitionMode()">🎓 Exhibition</button>
+        </div>
+    </header>
+
+
+    <section class="command-strip">
+        <div class="command-status">
+            <span class="pulse-ring"></span>
+            <div>
+                <span class="eyebrow">COMMAND NETWORK</span>
+                <strong>INTERSECTION 04 / SYNCHRONIX CORE</strong>
+            </div>
+        </div>
+        <div class="command-metrics">
+            <div class="command-metric"><span>LATENCY</span><b id="telemetryLatency">18 ms</b></div>
+            <div class="command-metric"><span>AI CONFIDENCE</span><b id="telemetryConfidence">98.4%</b></div>
+            <div class="command-metric"><span>UPTIME</span><b id="telemetryUptime">99.98%</b></div>
+            <div class="command-metric"><span>MODE</span><b id="telemetryMode">ADAPTIVE</b></div>
+        </div>
+        <div class="command-actions">
+            <button class="icon-btn" onclick="toggleControlDrawer()" title="System controls">⚙</button>
+            <button class="icon-btn" onclick="toggleCompactMode()" title="Compact view">◐</button>
+        </div>
+    </section>
+
+    <main class="dashboard">
+
+        <aside class="sidebar panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">CONTROL CENTER</span>
+                    <h2>Traffic Controls</h2>
+                </div>
+                <span class="section-index">01</span>
+            </div>
+
+            <div class="control-group">
+                <label class="group-label">Signal intelligence</label>
+                <div class="mode-selector">
+                    <label class="mode-option">
+                        <input type="radio" name="signalMode" value="ai" checked onchange="setSignalMode('ai')">
+                        <span class="mode-check">AI</span>
+                        <div class="option-info">
+                            <strong>SYNCHRONIX AI</strong>
+                            <small>Adaptive 15–45s timing</small>
+                        </div>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="signalMode" value="fixed" onchange="setSignalMode('fixed')">
+                        <span class="mode-check">30</span>
+                        <div class="option-info">
+                            <strong>Fixed Signal</strong>
+                            <small>Constant 30s green</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="label-row">
+                    <label class="group-label">Vehicle queues</label>
+                    <span class="micro-note">0–100</span>
+                </div>
+                <div class="road-inputs">
+                    <div class="road-input-card north-card">
+                        <div class="road-title"><span class="road-dot north-dot"></span>NORTH <span class="density-indicator" id="densityNorth">MEDIUM</span></div>
+                        <div class="counter-control">
+                            <button onclick="adjustTraffic('north', -5)">−</button>
+                            <input type="number" id="inputNorth" value="25" min="0" max="100" onchange="updateCustomTraffic()">
+                            <button onclick="adjustTraffic('north', 5)">+</button>
+                        </div>
+                    </div>
+                    <div class="road-input-card east-card">
+                        <div class="road-title"><span class="road-dot east-dot"></span>EAST <span class="density-indicator" id="densityEast">LOW</span></div>
+                        <div class="counter-control">
+                            <button onclick="adjustTraffic('east', -5)">−</button>
+                            <input type="number" id="inputEast" value="10" min="0" max="100" onchange="updateCustomTraffic()">
+                            <button onclick="adjustTraffic('east', 5)">+</button>
+                        </div>
+                    </div>
+                    <div class="road-input-card south-card">
+                        <div class="road-title"><span class="road-dot south-dot"></span>SOUTH <span class="density-indicator" id="densitySouth">HIGH</span></div>
+                        <div class="counter-control">
+                            <button onclick="adjustTraffic('south', -5)">−</button>
+                            <input type="number" id="inputSouth" value="42" min="0" max="100" onchange="updateCustomTraffic()">
+                            <button onclick="adjustTraffic('south', 5)">+</button>
+                        </div>
+                    </div>
+                    <div class="road-input-card west-card">
+                        <div class="road-title"><span class="road-dot west-dot"></span>WEST <span class="density-indicator" id="densityWest">MEDIUM</span></div>
+                        <div class="counter-control">
+                            <button onclick="adjustTraffic('west', -5)">−</button>
+                            <input type="number" id="inputWest" value="15" min="0" max="100" onchange="updateCustomTraffic()">
+                            <button onclick="adjustTraffic('west', 5)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="group-label">Quick scenarios</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="applyPreset('low')"><span>01</span> Low traffic</button>
+                    <button class="preset-btn" onclick="applyPreset('medium')"><span>02</span> Medium</button>
+                    <button class="preset-btn" onclick="applyPreset('high')"><span>03</span> Heavy</button>
+                    <button class="preset-btn preset-random" onclick="applyPreset('random')"><span>04</span> Random</button>
+                </div>
+            </div>
+
+            <div class="control-group emergency-box">
+                <div class="emergency-heading">
+                    <span>🚑</span>
+                    <div>
+                        <label class="group-label emergency-label">Emergency priority</label>
+                        <small>Override normal signal sequence</small>
+                    </div>
+                </div>
+                <select id="emergencyRoadSelect">
+                    <option value="none">No emergency vehicle</option>
+                    <option value="north">North Road Ambulance</option>
+                    <option value="east">East Road Ambulance</option>
+                    <option value="south">South Road Ambulance</option>
+                    <option value="west">West Road Ambulance</option>
+                </select>
+                <button class="emergency-btn" onclick="triggerEmergency()">ACTIVATE PRIORITY</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="runAiDecision()">🧠 RUN SYNCHRONIX AI</button>
+                <div class="sim-controls">
+                    <button class="btn btn-secondary" id="simToggleBtn" onclick="toggleSimulation()">▶ START</button>
+                    <button class="btn btn-danger" onclick="resetSimulation()">↺ RESET</button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main-stage panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">REAL-TIME VISUALIZATION</span>
+                    <h2>Intersection Command View</h2>
+                </div>
+                <div class="live-pill"><span></span> LIVE</div>
+            </div>
+
+            <div class="stage-layout">
+                <div class="intersection-wrapper">
+                    <div class="intersection-container">
+
+                        <div class="map-label map-label-north">NORTH</div>
+                        <div class="map-label map-label-east">EAST</div>
+                        <div class="map-label map-label-south">SOUTH</div>
+                        <div class="map-label map-label-west">WEST</div>
+
+                        <div class="road-lane lane-north" id="laneNorth">
+                            <div class="lane-header">NORTH</div>
+                            <div class="signal-housing" id="signalNorth">
+                                <div class="light red"></div><div class="light yellow"></div><div class="light green active"></div>
+                            </div>
+                            <div class="timer-display" id="timerNorth">30s</div>
+                            <div class="vehicle-queue" id="queueNorth"></div>
+                        </div>
+
+                        <div class="road-lane lane-west" id="laneWest">
+                            <div class="lane-header">WEST</div>
+                            <div class="signal-housing" id="signalWest">
+                                <div class="light red active"></div><div class="light yellow"></div><div class="light green"></div>
+                            </div>
+                            <div class="timer-display" id="timerWest">RED</div>
+                            <div class="vehicle-queue" id="queueWest"></div>
+                        </div>
+
+                        <div class="intersection-center" id="intersectionCenter">
+                            <div class="crosshair"></div>
+                            <div class="road-markings">
+                                <span class="crosswalk north-walk"></span>
+                                <span class="crosswalk south-walk"></span>
+                                <span class="crosswalk east-walk"></span>
+                                <span class="crosswalk west-walk"></span>
+                            </div>
+                            <div class="center-status" id="centerStatus">
+                                <span class="center-kicker">PRIORITY LANE</span>
+                                <div class="active-road-title" id="activeRoadTitle">NORTH GREEN</div>
+                                <div class="active-countdown" id="activeCountdown">30s</div>
+                            </div>
+                            <div class="moving-vehicle" id="movingVehicle">🚗</div>
+                        </div>
+
+                        <div class="road-lane lane-east" id="laneEast">
+                            <div class="lane-header">EAST</div>
+                            <div class="signal-housing" id="signalEast">
+                                <div class="light red"></div><div class="light yellow active"></div><div class="light green"></div>
+                            </div>
+                            <div class="timer-display" id="timerEast">READY</div>
+                            <div class="vehicle-queue" id="queueEast"></div>
+                        </div>
+
+                        <div class="road-lane lane-south" id="laneSouth">
+                            <div class="lane-header">SOUTH</div>
+                            <div class="signal-housing" id="signalSouth">
+                                <div class="light red active"></div><div class="light yellow"></div><div class="light green"></div>
+                            </div>
+                            <div class="timer-display" id="timerSouth">RED</div>
+                            <div class="vehicle-queue" id="queueSouth"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stage-summary">
+                    <div class="mini-card priority-card">
+                        <div class="mini-label">CURRENT PRIORITY</div>
+                        <strong id="stagePriority">NORTH</strong>
+                        <div class="priority-time"><span>GREEN</span><b id="stageTimer">30s</b></div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-label">NETWORK HEALTH</div>
+                        <div class="health-row"><span class="health-dot"></span><strong>OPTIMAL</strong></div>
+                        <div class="health-line"><span></span></div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-label">CONTROL LOGIC</div>
+                        <div class="logic-list">
+                            <div><span>01</span> Traffic density scan</div>
+                            <div><span>02</span> Emergency check</div>
+                            <div><span>03</span> Priority assignment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="congestion-alert hidden" id="congestionAlert">⚠️ HIGH CONGESTION DETECTED — Green duration extended automatically.</div>
+
+            <div class="demo-scenarios-bar">
+                <span class="scenarios-title">EXHIBITION DEMOS</span>
+                <button class="scenario-chip" onclick="loadScenario(1)">Normal traffic</button>
+                <button class="scenario-chip" onclick="loadScenario(2)">Heavy congestion</button>
+                <button class="scenario-chip" onclick="loadScenario(3)">Ambulance emergency</button>
+                <button class="scenario-chip" onclick="loadScenario(4)">Balanced traffic</button>
+            </div>
+        </section>
+
+        <aside class="insights panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">DECISION SUPPORT</span>
+                    <h2>AI Insight</h2>
+                </div>
+                <span class="ai-badge">AI</span>
+            </div>
+
+            <div class="decision-card" id="aiDecisionCard">
+                <div class="decision-top">
+                    <span class="mini-label">SELECTED GREEN ROAD</span>
+                    <span class="decision-live">● ACTIVE</span>
+                </div>
+                <h3 id="aiSelectedRoad">SOUTH ROAD</h3>
+                <div class="decision-metrics">
+                    <span class="pill pill-green" id="aiGreenTimePill">🟢 45 SECONDS</span>
+                    <span class="pill pill-density" id="aiDensityPill">HIGH DENSITY</span>
+                </div>
+                <div class="reason-box">
+                    <span class="mini-label">WHY THIS DECISION?</span>
+                    <p id="aiReasonText">South road has the highest traffic density (42 vehicles). SYNCHRONIX AI has assigned maximum green time priority.</p>
+                </div>
+            </div>
+
+            <div class="thinking-card">
+                <div class="card-title-row"><span>⚡</span><h3>Decision pipeline</h3></div>
+                <div class="flow-steps">
+                    <div class="step-item" id="step1"><div class="step-num">01</div><div class="step-text">Scan vehicle counts</div></div>
+                    <div class="step-arrow">↓</div>
+                    <div class="step-item" id="step2"><div class="step-num">02</div><div class="step-text">Check emergency priority</div></div>
+                    <div class="step-arrow">↓</div>
+                    <div class="step-item" id="step3"><div class="step-num">03</div><div class="step-text">Find highest density</div></div>
+                    <div class="step-arrow">↓</div>
+                    <div class="step-item" id="step4"><div class="step-num">04</div><div class="step-text">Calculate green time</div></div>
+                    <div class="step-arrow">↓</div>
+                    <div class="step-item" id="step5"><div class="step-num">05</div><div class="step-text">Grant green priority</div></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+
+
+<section class="scenario-command panel">
+  <div class="scenario-head">
+    <div>
+      <span class="eyebrow">SCENARIO LAB / AI TRAINING</span>
+      <h2>Traffic Environment Simulator</h2>
+      <p>Test SYNCHRONIX under different real-world traffic conditions.</p>
+    </div>
+    <div class="scenario-score">
+      <span>SIMULATION SCORE</span><strong id="simulationScore">92</strong><small>/100</small>
+      <div class="score-bar"><i id="scoreBar"></i></div>
+    </div>
+  </div>
+  <div class="scenario-grid">
+    <button class="scenario-card active" data-scenario="normal" onclick="selectScenario('normal',this)"><span class="scenario-icon">☀</span><div><b>Normal</b><small>Balanced traffic</small></div><em>01</em></button>
+    <button class="scenario-card" data-scenario="rush" onclick="selectScenario('rush',this)"><span class="scenario-icon">↗</span><div><b>Rush Hour</b><small>Heavy commuter flow</small></div><em>02</em></button>
+    <button class="scenario-card" data-scenario="rain" onclick="selectScenario('rain',this)"><span class="scenario-icon">☔</span><div><b>Heavy Rain</b><small>Low visibility + slower flow</small></div><em>03</em></button>
+    <button class="scenario-card" data-scenario="accident" onclick="selectScenario('accident',this)"><span class="scenario-icon">⚠</span><div><b>Accident</b><small>Lane blockage + diversion</small></div><em>04</em></button>
+    <button class="scenario-card" data-scenario="school" onclick="selectScenario('school',this)"><span class="scenario-icon">⌂</span><div><b>School Zone</b><small>Pedestrian safety priority</small></div><em>05</em></button>
+    <button class="scenario-card" data-scenario="pollution" onclick="selectScenario('pollution',this)"><span class="scenario-icon">◌</span><div><b>Pollution Alert</b><small>Emission-aware routing</small></div><em>06</em></button>
+  </div>
+  <div class="scenario-status">
+    <div class="scenario-status-main"><span class="status-dot"></span><div><b id="scenarioName">NORMAL TRAFFIC</b><small id="scenarioDescription">Adaptive timing with balanced traffic demand.</small></div></div>
+    <div class="scenario-tags" id="scenarioTags"><span>BASELINE</span><span>AI CONTROL</span><span>SAFE MODE</span></div>
+    <button class="scenario-run" onclick="runScenarioSimulation()">▶ RUN SCENARIO</button>
+  </div>
+</section>
+
+<section class="advanced-metrics">
+  <div class="advanced-card panel">
+    <div class="advanced-title"><span class="eyebrow">PREDICTION MODULE</span><b>Traffic Forecast</b><span class="metric-live">LIVE</span></div>
+    <div class="prediction-main"><strong id="predictionValue">18%</strong><span>expected congestion</span></div>
+    <div class="prediction-track"><i id="predictionBar"></i></div>
+    <div class="prediction-grid"><div><span>5 MIN</span><b id="pred5">18%</b></div><div><span>15 MIN</span><b id="pred15">24%</b></div><div><span>30 MIN</span><b id="pred30">31%</b></div><div><span>PEAK</span><b id="predPeak">42%</b></div></div>
+  </div>
+
+  <div class="advanced-card panel pollution-card">
+    <div class="advanced-title"><span class="eyebrow">ENVIRONMENT</span><b>Pollution Rate</b><span class="aqi-pill" id="aqiPill">GOOD</span></div>
+    <div class="pollution-main"><strong id="aqiValue">42</strong><span>AQI</span><div class="pollution-gauge"><i id="pollutionGauge"></i></div></div>
+    <div class="pollution-grid"><div><span>CO₂</span><b id="co2Value">18</b><small>kg/h</small></div><div><span>NO₂</span><b id="no2Value">21</b><small>µg/m³</small></div><div><span>PM2.5</span><b id="pmValue">12</b><small>µg/m³</small></div></div>
+  </div>
+
+  <div class="advanced-card panel safety-card">
+    <div class="advanced-title"><span class="eyebrow">SAFETY INTELLIGENCE</span><b>Priority Monitor</b><span class="metric-live">ACTIVE</span></div>
+    <div class="safety-list"><div><span>🚸 School safety</span><b id="schoolSafety">100%</b></div><div><span>🚑 Emergency response</span><b id="emergencySafety">98%</b></div><div><span>⚠ Incident handling</span><b id="incidentSafety">96%</b></div><div><span>🌧 Weather adaptation</span><b id="weatherSafety">94%</b></div></div>
+  </div>
+</section>
+
+    <section class="telemetry-grid">
+        <div class="telemetry-card network-card panel">
+            <div class="telemetry-card-head">
+                <div>
+                    <span class="eyebrow">NETWORK MAP</span>
+                    <h3>Signal coordination</h3>
+                </div>
+                <span class="live-pill"><span></span> SYNCED</span>
+            </div>
+            <div class="network-map">
+                <div class="network-line line-a"></div>
+                <div class="network-line line-b"></div>
+                <div class="network-line line-c"></div>
+                <div class="network-node node-core"><span>AI</span></div>
+                <div class="network-node node-n"><span>N</span><b>25</b></div>
+                <div class="network-node node-e"><span>E</span><b>10</b></div>
+                <div class="network-node node-s"><span>S</span><b>42</b></div>
+                <div class="network-node node-w"><span>W</span><b>15</b></div>
+            </div>
+        </div>
+
+        <div class="telemetry-card performance-card panel">
+            <div class="telemetry-card-head">
+                <div>
+                    <span class="eyebrow">SYSTEM PERFORMANCE</span>
+                    <h3>Adaptive efficiency</h3>
+                </div>
+                <span class="performance-score" id="performanceScore">94</span>
+            </div>
+            <div class="efficiency-ring">
+                <div class="ring-inner">
+                    <strong id="efficiencyValue">94%</strong>
+                    <span>EFFICIENCY</span>
+                </div>
+            </div>
+            <div class="performance-details">
+                <div><span>Queue reduction</span><b id="queueReduction">+27%</b></div>
+                <div><span>Signal utilization</span><b id="signalUtilization">91%</b></div>
+                <div><span>Emergency response</span><b id="emergencyResponse">1.8s</b></div>
+            </div>
+        </div>
+
+        <div class="telemetry-card activity-card panel">
+            <div class="telemetry-card-head">
+                <div>
+                    <span class="eyebrow">EVENT STREAM</span>
+                    <h3>Live system activity</h3>
+                </div>
+                <button class="clear-log" onclick="clearActivityLog()">CLEAR</button>
+            </div>
+            <div class="activity-list" id="activityList">
+                <div class="activity-item"><span class="activity-dot green"></span><div><b>AI engine initialized</b><small>Adaptive control ready</small></div><time>NOW</time></div>
+                <div class="activity-item"><span class="activity-dot cyan"></span><div><b>Traffic scan complete</b><small>4 approaches monitored</small></div><time>01:12</time></div>
+                <div class="activity-item"><span class="activity-dot yellow"></span><div><b>South queue elevated</b><small>Priority threshold crossed</small></div><time>01:09</time></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="analytics panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">PERFORMANCE MONITORING</span>
+                <h2>Live Traffic Analytics</h2>
+            </div>
+            <span class="analytics-badge">REAL-TIME</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-icon">🚗</span><div><small>Total waiting</small><strong id="statTotalVehicles">92</strong></div></div>
+            <div class="stat-card"><span class="stat-icon">✓</span><div><small>Vehicles processed</small><strong id="statProcessedVehicles">0</strong></div></div>
+            <div class="stat-card"><span class="stat-icon">⚠</span><div><small>Most congested</small><strong id="statCongestedRoad">SOUTH</strong></div></div>
+            <div class="stat-card"><span class="stat-icon">⏱</span><div><small>Current green</small><strong id="statCurrentGreenTime">45s</strong></div></div>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="density-chart-container">
+                <div class="chart-header"><div><span class="eyebrow">QUEUE DISTRIBUTION</span><h3>Road traffic density</h3></div><span>VEHICLES</span></div>
+                <div class="chart-bars">
+                    <div class="bar-group"><div class="bar-fill north-bar" id="barNorth" style="height:45%"><span class="bar-val" id="barValNorth">25</span></div><span class="bar-label">NORTH</span></div>
+                    <div class="bar-group"><div class="bar-fill east-bar" id="barEast" style="height:20%"><span class="bar-val" id="barValEast">10</span></div><span class="bar-label">EAST</span></div>
+                    <div class="bar-group"><div class="bar-fill south-bar" id="barSouth" style="height:80%"><span class="bar-val" id="barValSouth">42</span></div><span class="bar-label">SOUTH</span></div>
+                    <div class="bar-group"><div class="bar-fill west-bar" id="barWest" style="height:30%"><span class="bar-val" id="barValWest">15</span></div><span class="bar-label">WEST</span></div>
+                </div>
+            </div>
+
+            <div class="comparison-card">
+                <div class="eyebrow">CONTROL STRATEGY</div>
+                <div class="comparison-row">
+                    <div class="strategy fixed-comp"><span>TRADITIONAL</span><strong>Fixed 30s</strong><p>Same green duration regardless of queue size.</p></div>
+                    <div class="vs">VS</div>
+                    <div class="strategy ai-comp"><span>SMART AI</span><strong>Adaptive 15–45s</strong><p>Allocates time from traffic density and emergency priority.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+
+<section class="score-breakdown panel">
+  <div class="score-header"><div><span class="eyebrow">AI EVALUATION</span><h2>Simulation Performance Score</h2></div><div class="grade-badge" id="gradeBadge">A</div></div>
+  <div class="score-components">
+    <div><span>🚦 Traffic efficiency</span><b id="scoreEfficiency">94</b><i><em style="width:94%"></em></i></div>
+    <div><span>🛡 Safety response</span><b id="scoreSafety">97</b><i><em style="width:97%"></em></i></div>
+    <div><span>🌱 Environmental impact</span><b id="scoreEnvironment">90</b><i><em style="width:90%"></em></i></div>
+    <div><span>🧠 Prediction accuracy</span><b id="scorePrediction">93</b><i><em style="width:93%"></em></i></div>
+    <div><span>⏱ Waiting-time reduction</span><b id="scoreWaiting">91</b><i><em style="width:91%"></em></i></div>
+  </div>
+  <div class="score-footer"><span id="scoreSummary">Excellent adaptive control — traffic flow is stable.</span><button onclick="resetSimulationScore()">RESET SCORE</button></div>
+</section>
+
+<div id="controlDrawer" class="control-drawer hidden">
+    <div class="drawer-backdrop" onclick="toggleControlDrawer()"></div>
+    <aside class="drawer-panel">
+        <div class="drawer-head">
+            <div><span class="eyebrow">SYSTEM CONFIGURATION</span><h2>Command Settings</h2></div>
+            <button class="drawer-close" onclick="toggleControlDrawer()">×</button>
+        </div>
+        <div class="drawer-section">
+            <label>Interface density</label>
+            <div class="segmented">
+                <button class="selected" onclick="setInterfaceDensity('comfortable',this)">Comfortable</button>
+                <button onclick="setInterfaceDensity('compact',this)">Compact</button>
+            </div>
+        </div>
+        <div class="drawer-section">
+            <label>Motion effects</label>
+            <button class="drawer-toggle selected" id="motionToggle" onclick="toggleMotion(this)"><span></span><b>Enabled</b></button>
+        </div>
+        <div class="drawer-section">
+            <label>AI transparency</label>
+            <div class="setting-row"><span>Show decision pipeline</span><input type="checkbox" checked onchange="togglePipeline(this)"></div>
+            <div class="setting-row"><span>Show telemetry</span><input type="checkbox" checked onchange="toggleTelemetry(this)"></div>
+            <div class="setting-row"><span>Highlight priority road</span><input type="checkbox" checked onchange="togglePriorityGlow(this)"></div>
+        </div>
+        <div class="drawer-footer"><span>SYNCHRONIX CORE v2.4</span><span>● SECURE</span></div>
+    </aside>
+</div>
+
+<div id="exhibitionModal" class="exhibition-modal hidden">
+    <div class="exhibition-content">
+        <div class="exhibition-header">
+            <div><span class="eyebrow">LIVE PRESENTATION</span><h2>🚦 SYNCHRONIX Demonstration</h2></div>
+            <button class="exhibition-close-btn" onclick="toggleExhibitionMode()">Close ×</button>
+        </div>
+        <div class="exhibition-body">
+            <div class="exhibition-card main-decision-display">
+                <span class="eyebrow">BRAIN / DECISION RESULT</span>
+                <div class="huge-road-title" id="exhibitionRoadTitle">SOUTH ROAD</div>
+                <div class="huge-green-timer" id="exhibitionTimer">🟢 45 SECONDS GREEN</div>
+                <div class="exhibition-reason" id="exhibitionReason">South has the highest traffic density (42 vehicles). Given priority.</div>
+            </div>
+            <div class="exhibition-traffic-list">
+                <span class="eyebrow">CURRENT TRAFFIC COUNTS</span>
+                <div class="exhibition-grid">
+                    <div class="ex-road-box" id="exNorthBox"><span>NORTH</span><strong id="exNorthVal">25</strong></div>
+                    <div class="ex-road-box" id="exEastBox"><span>EAST</span><strong id="exEastVal">10</strong></div>
+                    <div class="ex-road-box active-ex-road" id="exSouthBox"><span>SOUTH 🟢</span><strong id="exSouthVal">42</strong></div>
+                    <div class="ex-road-box" id="exWestBox"><span>WEST</span><strong id="exWestVal">15</strong></div>
+                </div>
+            </div>
+            <div class="exhibition-actions">
+                <button class="ex-btn ex-btn-primary" onclick="runAiDecision()">🧠 RUN AI DECISION</button>
+                <button class="ex-btn ex-btn-emergency" onclick="triggerEmergency()">🚑 DEMO EMERGENCY</button>
+                <button class="ex-btn ex-btn-next" onclick="loadNextExhibitionPreset()">🎲 NEXT SCENARIO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script src="enhancements.js"></script>
+<script src="scenario-engine.js"></script>
+<script>
+    // Cosmetic live clock; existing simulator logic remains in script.js.
+    function updateClock() {
+        const el = document.getElementById('liveClock');
+        if (el) el.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Keeps the new center summary visually synced when the existing JS updates the original IDs.
+    const syncStage = () => {
+        const road = document.getElementById('activeRoadTitle');
+        const timer = document.getElementById('activeCountdown');
+        const p = document.getElementById('stagePriority');
+        const t = document.getElementById('stageTimer');
+        if (road && p) p.textContent = road.textContent.replace(' GREEN','');
+        if (timer && t) t.textContent = timer.textContent;
+    };
+    setInterval(syncStage, 250);
+</script>
+</body>
+</html>
